@@ -24,6 +24,8 @@ public class LifeCycle : MonoBehaviour
     void Update()//게임 로직 업데이트 컴퓨터에 따라 실행주기 다름
     {
          Debug.Log("몬스터 사냥!");
+         if(Input.anyKeyDown)
+         Debug.Log("플레이어가 아무 키를 눌렀습니다.");
     }
 
     void LateUpdate() // 모든 업데이트 끝난 후 카메라나 로직 후처리 담당
