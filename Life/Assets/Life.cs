@@ -10,7 +10,10 @@ public class Life : MonoBehaviour
     }
     void Update()
     {
-        Vector3 vec = new Vector3(Input.GetAxisRaw("Horizontal"),Input.GetAxisRaw("Vertical"),0); //백터값
+        Vector3 vec = new Vector3
+        (Input.GetAxis("Horizontal")*Time.deltaTime
+        ,Input.GetAxis("Vertical")*Time.deltaTime
+        ,0); //백터값
         transform.Translate(vec);
     }
 
