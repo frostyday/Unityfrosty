@@ -23,6 +23,8 @@ public class Move : MonoBehaviour
         //4.SLerp(구면 선형 보간)  
         transform.position = 
              Vector3.Slerp(transform.position,target, 0.5f);  
+    
+
     }
 
 }
