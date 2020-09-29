@@ -5,6 +5,7 @@ using UnityEngine;
 public class PlayerMove : MonoBehaviour
 {
     public float maxSpeed;
+    public float jumpPower;
     Rigidbody2D rigid;
     SpriteRenderer spriteRenderer;
     Animator anim;
@@ -14,8 +15,15 @@ public class PlayerMove : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
     }
-    void Update()
+    void Update()//단발적인건 updata에 하는게 좋음
+
     {
+        //jump
+         if(Input.GetButtonDown("Jump") && !anim.GetBool("isJumping")){
+             rigid.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+             anim.SetBool("isJumping", true);
+        }
+
         //stop speed
         if(Input.GetButtonUp("Horizontal")){
             rigid.velocity = new Vector2(rigid.velocity.normalized.x*0.5f, rigid.velocity.y );
@@ -43,5 +51,20 @@ public class PlayerMove : MonoBehaviour
             rigid.velocity = new Vector2(maxSpeed, rigid.velocity.y );
         else if(rigid.velocity.x < maxSpeed*(-1)) //왼쪽 최대 속도
             rigid.velocity = new Vector2(maxSpeed*(-1), rigid.velocity.y );
+        //Landing Platform
+        
+        if(rigid.velocity.y < 0){
+               Debug.DrawRay(rigid.position, Vector3.down, new Color(0,1,0));//감지시스템
+
+        RaycastHit2D rayHit = Physics2D.Raycast(rigid.position, Vector3.down, 1, LayerMask.GetMask("Platform"));//바닥만 인식되게
+
+        if(rayHit.collider != null){
+            if(rayHit.distance < 0.5f)
+                anim.SetBool("isJumping",false);
+        }
+
+        }
+        
+    
     }
 }
