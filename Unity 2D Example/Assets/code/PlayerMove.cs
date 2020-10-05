@@ -19,7 +19,9 @@ public class PlayerMove : MonoBehaviour
 
     {
         //jump
+        
          if(Input.GetButtonDown("Jump") && !anim.GetBool("isJumping")){
+             rigid.velocity = new Vector2(rigid.velocity.x, 0);
              rigid.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
              anim.SetBool("isJumping", true);
         }
@@ -66,5 +68,27 @@ public class PlayerMove : MonoBehaviour
         }
         
     
+    }
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if(collision.gameObject.tag == "Enemy")
+            OnDamaged(collision.transform.position);
+            
+    }
+
+    void OnDamaged(Vector2 targetPos){ //피격시 무적
+        gameObject.layer = 11;
+
+        spriteRenderer.color = new Color(1,1,1,0.4f); //플레이어 색 변경
+        int dirc = transform.position.x-targetPos.x > 0 ? 1 : -1; // 피격시 해당 방향으로 튕겨나가게 함
+        rigid.AddForce(new Vector2(dirc,1)*7,ForceMode2D.Impulse);
+        //Animation
+        anim.SetTrigger("doDamaged");
+        Invoke("OffDamaged", 2); //무적시간 선택
+    }
+
+    void OffDamaged(){
+        gameObject.layer = 10;
+        spriteRenderer.color = new Color(1,1,1,1);
     }
 }
