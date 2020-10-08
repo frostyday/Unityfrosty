@@ -4,16 +4,19 @@ using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
 {
+    public GameManager gameManager;
     public float maxSpeed;
     public float jumpPower;
     Rigidbody2D rigid;
     SpriteRenderer spriteRenderer;
     Animator anim;
+     CapsuleCollider2D capsuleCollider;
     void Awake()
     {
         rigid = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
+        capsuleCollider = GetComponent<CapsuleCollider2D>();
     }
     void Update()//단발적인건 updata에 하는게 좋음
 
@@ -31,7 +34,7 @@ public class PlayerMove : MonoBehaviour
             rigid.velocity = new Vector2(rigid.velocity.normalized.x*0.5f, rigid.velocity.y );
         }
         //캐릭터 방향에 따라 축 전환
-        if(Input.GetButtonDown("Horizontal")){
+        if(Input.GetButton("Horizontal")){
         spriteRenderer.flipX = Input.GetAxisRaw("Horizontal") == -1;
         }
 
@@ -69,14 +72,63 @@ public class PlayerMove : MonoBehaviour
         
     
     }
-    void OnCollisionEnter2D(Collision2D collision)
+    void OnCollisionEnter2D(Collision2D collision) // 충돌
     {
         if(collision.gameObject.tag == "Enemy")
-            OnDamaged(collision.transform.position);
+            //공격
+            if(rigid.velocity.y < 0 && transform.position.y > collision.transform.position.y){
+
+            }
+           
+           else{
+               OnDamaged(collision.transform.position);
+           } 
             
     }
 
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.gameObject.tag == "Item"){
+            //점수
+            bool isBronze = collision.gameObject.name.Contains("Bronze");// 비교문
+            bool isSilver = collision.gameObject.name.Contains("Silver");
+            bool isGold = collision.gameObject.name.Contains("Gold");
+           
+           if(isBronze) // 점수 차등 지급
+            gameManager.stagePoint += 50;
+            else if(isSilver)
+            gameManager.stagePoint += 100;
+            else if(isGold)
+            gameManager.stagePoint += 300;
+
+
+
+
+
+            //아이템 사라지게
+            collision.gameObject.SetActive(false);
+        }
+        else if(collision.gameObject.tag == "Fnish"){
+            //다음 스테이지
+            gameManager.NextStage();
+        }
+    }
+
+
+
+
+     void OnAttack(Transform enemy){
+
+        rigid.AddForce(Vector2.up * 5, ForceMode2D.Impulse);
+        
+        EnemyMove enemyMove = enemy.GetComponent<EnemyMove>();
+        enemyMove.OnDamaged();
+    }
+
     void OnDamaged(Vector2 targetPos){ //피격시 무적
+
+        //피 감소
+        gameManager.HealthDown();
         gameObject.layer = 11;
 
         spriteRenderer.color = new Color(1,1,1,0.4f); //플레이어 색 변경
@@ -87,8 +139,21 @@ public class PlayerMove : MonoBehaviour
         Invoke("OffDamaged", 2); //무적시간 선택
     }
 
+
     void OffDamaged(){
         gameObject.layer = 10;
         spriteRenderer.color = new Color(1,1,1,1);
+    }
+
+     public void OnDie(){
+        spriteRenderer.color = new Color(1, 1, 1, 0.4f);
+        spriteRenderer.flipY = true;
+        capsuleCollider.enabled = false;
+        rigid.AddForce(Vector2.up * 5, ForceMode2D.Impulse);
+    }
+
+    public void VelocityZero()
+    {
+        rigid.velocity = Vector2.zero;
     }
 }
